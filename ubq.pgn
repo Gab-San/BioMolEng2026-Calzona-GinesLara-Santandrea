@@ -1,0 +1,31 @@
+# load vmd package protein structure generator. 
+# It will complement the pdb with extra generation needed.
+package require psfgen
+
+# Specify the topology file. This files specifies the topology of all 20 aminoacids.
+topology top_all27_prot_lipid.inp
+
+# pdbalias for the histidin aminoacid.
+# histidin is one of the 20 natural aminoacid and around ph7 it could be present in 3 different protonation
+# states, the hydrogen atoms are shaped in 3 different configurations, 2 neutral and 1 not (or viceversa).
+
+# In this case we are saying that all histidine in the model will be modeled as HSE.
+pdbalias residue HIS HSE
+
+# Refers to an atom which is referred to CD1 in the topology file and CD in the force field.
+pdbalias atom ILE CD1 CD
+
+# Generate a segment based on the pdb file just created
+segment U {pdb ubqp.pdb}
+
+# Assign the coordinate on the atoms based on the pdb just created
+coordpdb ubqp.pdb U
+
+# Guess the coordinates of the missing atoms. (Hydrogens and more)
+guesscoord
+
+# Write a new set of coordinates. (it will include hydrogen atoms and 'guessed atoms')
+writepdb ubq.pdb
+
+# Write a protein structure generator file
+writepsf ubq.psf
