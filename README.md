@@ -55,7 +55,7 @@ In vmd Plugins --> TkConsole
 
 ```
 package require solvate
-solvate cof.psf cof.pdb -t 5 -o cof_wb
+solvate cofp.psf cofp.pdb -t 5 -o cof_wb
 ```
 
 -t <dist> is the box padding in Armstrong
