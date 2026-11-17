@@ -31,7 +31,7 @@ We present here a step by step guide on what we did.
 1. Import `top_all27_prot_lipid.inp` that describes the CHARMM22 force field from a given library;
 1. Export the protein atoms and remove noise atoms using the lines in [here](#export-principal-protein-atoms);
 1. Write the `.pgn` file to generate the protein structure with the addition of the missing atoms;
-1. Run the `.pgn` file with `vmd cof.pgn`
+1. Run the `.pgn` file by launching `vmd -dispdev text -e cof.pgn` 
 1. [Add water to the obtained protein](#how-to-add-water)
 1. [Add ions to the obtained water solution](#how-to-add-ions)
 
@@ -58,7 +58,7 @@ package require solvate
 solvate cof.psf cof.pdb -t 5 -o cof_wb
 ```
 
--t is the box padding in Armstrong
+-t <dist> is the box padding in Armstrong
 
 #### How To Add Ions
 
