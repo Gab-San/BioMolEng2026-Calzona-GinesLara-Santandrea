@@ -44,7 +44,7 @@ In vmd Plugins --> TkConsole
 ```
 tkcon font 'Courier' 18 # Better readability
 set a [atomselect top protein]
-$a writepdb ubqp.pdb
+$a writepdb cofp.pdb
 ```
 
 #### How To Add Water
@@ -55,15 +55,19 @@ In vmd Plugins --> TkConsole
 
 ```
 package require solvate
-solvate cofp.psf cofp.pdb -t 5 -o cof_wb
+solvate cof.psf cof.pdb -t 5 -o cof_wb
 ```
 
 -t <dist> is the box padding in Armstrong
 
 #### How To Add Ions
 
-In vmd Modeling --> Add Ions
+In vmd Plugins --> TkConsole
 
-We followed the paper and used 0.1M of NaCl.
+```
+package require autoionize
+autoionize -psf cof.psf -pdb cof.pdb -sc 0.1 -o cof_ionized
+```
+
 
 [^1]: <!--TODO: add doi--->
