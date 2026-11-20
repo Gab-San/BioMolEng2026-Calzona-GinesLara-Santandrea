@@ -11,6 +11,13 @@ that supposedly would make Cofilin protein more thermically stable.
 - [Engineering a thermostable mutation of Cofilin (1-COF)](#engineering-a-thermostable-mutation-of-cofilin-1-cof)
   - [TOOLS](#tools)
   - [GUIDE](#guide)
+    - [Auxiliary Code](#auxiliary-code)
+      - [Export Principal Protein Atoms](#export-principal-protein-atoms)
+      - [How To Add Water](#how-to-add-water)
+      - [How To Add Ions](#how-to-add-ions)
+  - [Notes from the tutorial](#notes-from-the-tutorial)
+    - [Electrostatics with MSM](#electrostatics-with-msm)
+    - [Electrostatics with PME](#electrostatics-with-pme)
 <!--toc:end-->
 
 ---
@@ -28,12 +35,12 @@ The tools we used are:
 We present here a step by step guide on what we did.
 
 1. Download the [1-COF](https://www.rcsb.org/structure/1COF) `.pdb` file from the Protein Data Bank;
-1. Import `top_all27_prot_lipid.inp` that describes the CHARMM22 force field from a given library;
-1. Export the protein atoms and remove noise atoms using the lines in [here](#export-principal-protein-atoms);
-1. Write the `.pgn` file to generate the protein structure with the addition of the missing atoms;
-1. Run the `.pgn` file by launching `vmd -dispdev text -e cof.pgn` 
-1. [Add water to the obtained protein](#how-to-add-water)
-1. [Add ions to the obtained water solution](#how-to-add-ions)
+2. Import `top_all27_prot_lipid.inp` that describes the CHARMM22 force field from a given library;
+3. Export the protein atoms and remove noise atoms using the lines in [here](#export-principal-protein-atoms);
+4. Write the `.pgn` file to generate the protein structure with the addition of the missing atoms;
+5. Run the `.pgn` file by launching `vmd -dispdev text -e cof.pgn` 
+6. [Add water to the obtained protein](#how-to-add-water)
+7. [Add ions to the obtained water solution](#how-to-add-ions)
 
 
 ### Auxiliary Code
@@ -66,7 +73,7 @@ In vmd Plugins --> TkConsole
 
 ```
 package require autoionize
-autoionize -psf cof.psf -pdb cof.pdb -sc 0.1 -o cof_ionized
+autoionize -psf cof_wb.psf -pdb cof_wb.pdb -sc 0.1 -o cof_ionized
 ```
 
 
