@@ -32,7 +32,6 @@ while read -r record atom_number atom_name residue_name chain position rest; do
             foldx --command=PositionScan \
                 --pdb=1COF_Repair.pdb \
                 --pdb-dir="$pdb_dir/" \
-                --out-pdb=false \
                 --positions="${amino_acid}A${position}a"
 
             # Moving \Delta \Delta g file to position_scan
@@ -40,3 +39,8 @@ while read -r record atom_number atom_name residue_name chain position rest; do
         )
     fi
 done < "1COF_Repair.pdb"
+
+# Producing the file with sorted mutation values
+# Selecting every line except the first (it represents no mutation)
+awk 'FNR > 1' output/position_scan/*.txt |
+    sort -g -k2,2 > "sorted_positions.txt"
