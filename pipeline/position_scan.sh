@@ -42,5 +42,21 @@ done < "1COF_Repair.pdb"
 
 # Producing the file with sorted mutation values
 # Selecting every line except the first (it represents no mutation)
+# It also substitutes 3-letter codes with 1-letter ones
 awk 'FNR > 1' output/position_scan/*.txt |
-    sort -g -k2,2 > "sorted_positions.txt"
+    sort -g -k2,2 |
+    awk '
+        # Load the amino acid dictionary
+        NR == FNR {
+            codes[$1] = $2
+            next
+        }
+
+        # Convert the beginning of each result line
+        {
+            code = substr($0, 1, 3)
+            if (code in codes)
+                $0 = codes[code] substr($0, 4)
+            print
+        }
+    ' amino_acid_codes.txt - > "sorted_positions.txt"
