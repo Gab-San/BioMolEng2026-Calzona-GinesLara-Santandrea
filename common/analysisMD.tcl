@@ -218,9 +218,11 @@ if {$do_beta || $do_alpha} {
     puts "Calculate secondary structure"
     if {$do_beta} {set beta_out [open_table beta.dat $time_label "Beta fraction" "Beta count"]}
     if {$do_alpha} {set alpha_out [open_table alpha.dat $time_label "Alpha fraction" "Alpha count"]}
+
     for {set i 0} {$i < $nf} {incr i $step} {
         molinfo $molid set frame $i
         $ca frame $i
+
         mol ssrecalc $molid
         set st [$ca get structure]
         if {$do_beta} {
