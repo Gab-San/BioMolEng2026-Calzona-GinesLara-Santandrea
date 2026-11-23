@@ -1,2 +1,9 @@
+# File outputs
+
 pipeline/output/position_scan/runs/
 pipeline/output/repair_pdb/
+pipeline/output/build_model/
+pipeline/output/preprocessed/
+pipeline/output/repair_pdb/
+pipeline/output/simulated
+pipeline/sorted_positions.txt
