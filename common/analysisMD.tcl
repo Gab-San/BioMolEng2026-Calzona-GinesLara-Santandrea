@@ -1,5 +1,5 @@
 # Cofilin trajectory analysis (VMD)
-# Usage: vmd -dispdev text -e analysisMD_fixed.tcl -args PSF DCD [TIMESTEP DCDFREQ OUTPUT_DIR STEP TIME_UNIT]
+# Usage: vmd -dispdev text -e analysisMD.tcl -args PSF DCD [TIMESTEP DCDFREQ OUTPUT_DIR STEP TIME_UNIT]
 # Defaults: 2.0 fs, 5000 integration steps, analysis, 1 frame, ps.
 
 # =================================================
@@ -14,7 +14,7 @@ proc fatal {message} {
 }
 
 if {$nargs < 2 || $nargs > 7} {
-    puts stderr {Usage: vmd -dispdev text -e analysisMD_fixed.tcl -args PSF DCD [TIMESTEP DCDFREQ OUTPUT_DIR STEP TIME_UNIT]}
+    puts stderr {Usage: vmd -dispdev text -e analysisMD.tcl -args PSF DCD [TIMESTEP DCDFREQ OUTPUT_DIR STEP TIME_UNIT]}
     exit 1
 }
 

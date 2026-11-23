@@ -15,7 +15,7 @@ that supposedly would make Cofilin protein more thermically stable.
       - [Export Principal Protein Atoms](#export-principal-protein-atoms)
       - [How To Add Water](#how-to-add-water)
       - [How To Add Ions](#how-to-add-ions)
-  - [Notes from the tutorial](#notes-from-the-tutorial)
+  - [Notes from VMD the tutorial](#notes-from-vmd-the-tutorial)
     - [Electrostatics with MSM](#electrostatics-with-msm)
     - [Electrostatics with PME](#electrostatics-with-pme)
 <!--toc:end-->
@@ -42,7 +42,7 @@ We present here a step by step guide on what we did.
 6. [Add water to the obtained protein](#how-to-add-water)
 7. [Add ions to the obtained water solution](#how-to-add-ions)
 8. Run the simulation with namd: `namd +p<threads_num>  <config-file>.conf`
-9. Post-process using [analysisMD.tcl](common/analysisMD.tcl) script: `vmd -dispdev text -e analysisMD_fixed.tcl -args PSF DCD [TIMESTEP DCDFREQ OUTPUT_DIR STEP TIME_UNIT]`
+9. Post-process using [analysisMD.tcl](common/analysisMD.tcl) script: `vmd -dispdev text -e analysisMD.tcl -args PSF DCD [TIMESTEP DCDFREQ OUTPUT_DIR STEP TIME_UNIT]`
 10. Plot the analysis data with [plot.py](common/plot.py): `python plot.py <path-to-file> | <path-to-directory>`
 
 
