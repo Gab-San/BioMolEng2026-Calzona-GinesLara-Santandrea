@@ -41,10 +41,16 @@ We present here a step by step guide on what we did.
 5. Run the `.pgn` file by launching `vmd -dispdev text -e cof.pgn` 
 6. [Add water to the obtained protein](#how-to-add-water)
 7. [Add ions to the obtained water solution](#how-to-add-ions)
+8. Run the simulation with namd: `namd +p<threads_num>  <config-file>.conf`
+9. Post-process using [analysisMD.tcl](common/analysisMD.tcl) script: `vmd -dispdev text -e analysisMD_fixed.tcl -args PSF DCD [TIMESTEP DCDFREQ OUTPUT_DIR STEP TIME_UNIT]`
+10. Plot the analysis data with [plot.py](common/plot.py): `python plot.py <path-to-file> | <path-to-directory>`
+
 
 
 ### Auxiliary Code
 #### Export Principal Protein Atoms
+
+Open the target protein in vmd: `vmd 1COF.pdb`
 
 In vmd Plugins --> TkConsole
 
@@ -56,16 +62,18 @@ $a writepdb cofp.pdb
 
 #### How To Add Water
 
-Open the desired protein in vmd: `vmd cof.pdb cof.psf`
-
 In vmd Plugins --> TkConsole
 
 ```
 package require solvate
-solvate cof.psf cof.pdb -t 5 -o cof_wb
+solvate cof.psf cof.pdb -t <dist> -o cof_wb
 ```
 
--t <dist> is the box padding in Armstrong
+`-t <dist>` is the box padding in Armstrong
+
+> We used a distance of 8Å due to choosing a cutoff distance of 12Å.
+> 
+> The distance used in the reference paper is 15Å.
 
 #### How To Add Ions
 
@@ -76,8 +84,11 @@ package require autoionize
 autoionize -psf cof_wb.psf -pdb cof_wb.pdb -sc 0.1 -o cof_ionized
 ```
 
+`-sc <concentration>` option neutralizes and dissolves ions 
+in order to reach concentration (M)
 
-## Notes from the tutorial
+
+## Notes from VMD the tutorial
 
 ### Electrostatics with MSM
 
