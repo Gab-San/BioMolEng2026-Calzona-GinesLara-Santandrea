@@ -46,6 +46,11 @@ We present here a step by step guide on what we did.
 10. Plot the analysis data with [plot.py](common/plot.py): `python plot.py <path-to-file> | <path-to-directory>`
 
 
+> To use the plotting script you will need some libraries. The required libraries are in [requirements.txt](common/requirements.txt) and can be installed with pip install -r requirements.txt.
+>
+> One can create a [python virtual environment](https://docs.python.org/3/library/venv.html) so not to clutter the global pip library.
+
+
 
 ### Auxiliary Code
 #### Export Principal Protein Atoms
