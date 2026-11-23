@@ -15,8 +15,10 @@ while getopts ":k:p:g" option; do
     esac
 done
 
-bash ./repair.sh
-bash ./position_scan.sh
-bash ./build_model.sh $k
-bash ./preprocess.sh $k
-bash ./simulate.sh $k $processors $gpu
+# Running pipeline
+bash scripts/repair.sh
+bash scripts/position_scan.sh
+bash scripts/build_model.sh $k
+bash scripts/preprocess.sh $k
+bash scripts/simulate.sh $k $processors $gpu
+bash scripts/postprocess.sh $k

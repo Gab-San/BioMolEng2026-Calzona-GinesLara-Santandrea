@@ -1,14 +1,17 @@
 # Analysis output
 **/analysis/*
 **/output/*
-FFTW_NAMD_3.0.3_Linux-x86_64-multicore.txt
 
-# File outputs
+# Pipeline file outputs
+pipeline/output/repair_pdb
 
 pipeline/output/position_scan/runs
-pipeline/output/repair_pdb
-pipeline/output/build_model
-pipeline/output/preprocessed
-pipeline/output/repair_pdb
-pipeline/output/simulated
 pipeline/sorted_positions.txt
+
+pipeline/output/build_model
+
+pipeline/output/preprocessed
+
+pipeline/output/simulated
+
+pipeline/output/postprocessed
