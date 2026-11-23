@@ -41,6 +41,20 @@ EOF
         cd $output_dir
         # Without /dev/null, the rest is interpreted as additional input
         vmd -dispdev text -e "${pipeline_dir}/cof.pgn" < /dev/null
+
+        # Add water and ions using the settings in the README.
+        vmd -dispdev text -e /dev/stdin <<'EOF'
+if {[catch {
+    package require solvate
+    solvate cof.psf cof.pdb -t 5 -o cof_wb
+    package require autoionize
+    autoionize -psf cof_wb.psf -pdb cof_wb.pdb -sc 0.1 -o cof_ionized
+} message]} {
+    puts stderr "Solvation or ionization failed: $message"
+    exit 1
+}
+exit 0
+EOF
     )
 
     idx=$((idx + 1))
