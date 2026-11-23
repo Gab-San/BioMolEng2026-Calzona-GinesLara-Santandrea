@@ -1,3 +1,8 @@
+# Analysis output
+**/analysis/*
+**/output/*
+FFTW_NAMD_3.0.3_Linux-x86_64-multicore.txt
+
 # File outputs
 
 pipeline/output/position_scan/runs
