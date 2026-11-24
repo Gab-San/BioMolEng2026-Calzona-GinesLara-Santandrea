@@ -1,17 +1,20 @@
+# WT file outputs
+wt/output_1ns_300k/*
+
 # Analysis output
 **/analysis/*
 **/output/*
 
 # Pipeline file outputs
-pipeline/output/repair_pdb
+pipeline/output/repair_pdb/*
 
-pipeline/output/position_scan/runs
+pipeline/output/position_scan/runs/*
 pipeline/sorted_positions.txt
 
-pipeline/output/build_model
+pipeline/output/build_model/*
 
-pipeline/output/preprocessed
+pipeline/output/preprocessed/*
 
-pipeline/output/simulated
+pipeline/output/simulated/*
 
-pipeline/output/postprocessed
+pipeline/output/postprocessed/*

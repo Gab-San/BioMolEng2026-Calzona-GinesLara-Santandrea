@@ -16,7 +16,7 @@ while read -r record atom_number atom_name residue_name chain position rest; do
     # the position number writes the amino acid number in the chain.
     # Thus only when the position changes we need to run PositionScan
 #     if [[ $record == ATOM && $position != "$current_pos" ]]; then
-    if [[ $record == ATOM && $position != "$current_pos" && ($position == 19 || $position == 20) ]]; then
+    if [[ $record == ATOM && $position != "$current_pos" ]]; then
         # Selecting correct letter
         current_pos=$position
         amino_acid=${amino_acid_codes[$residue_name]-}
