@@ -23,6 +23,10 @@ while read -r mutation rest; do
         vmd -dispdev text -e ${pipeline_dir}/../common/analysisMD.tcl \
          -args ../../preprocessed/${mutation}/cof_ionized.psf ../../simulated/${mutation}/cof_eq.pdb.dcd < /dev/null|| exit 1
         
+        # Postprocessing Q-value calculation
+        vmd -dispdev text -e ${pipeline_dir}/../common/atomq_updated.tcl \
+         -args ../../preprocessed/${mutation}/cof_ionized.psf ../../simulated/${mutation}/cof_eq.pdb.dcd < /dev/null|| exit 1
+
         # Plotting
         poetry run python3 ${pipeline_dir}/../common/plot.py analysis/*.dat -o plots || exit 1
     )

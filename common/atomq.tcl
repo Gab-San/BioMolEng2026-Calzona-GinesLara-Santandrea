@@ -1,3 +1,5 @@
+source VMDextensions.tcl
+
 set molid [molinfo top]
 set nf [molinfo $molid get numframes]
 
