@@ -11,6 +11,7 @@ that supposedly would make Cofilin protein more thermically stable.
 - [Engineering a thermostable mutation of Cofilin (1-COF)](#engineering-a-thermostable-mutation-of-cofilin-1-cof)
   - [TOOLS](#tools)
   - [GUIDE](#guide)
+    - [Automated pipeline](#automated-pipeline)
     - [Auxiliary Code](#auxiliary-code)
       - [Export Principal Protein Atoms](#export-principal-protein-atoms)
       - [How To Add Water](#how-to-add-water)
@@ -31,6 +32,13 @@ The tools we used are:
 - [NAMD](https://www.ks.uiuc.edu/Research/namd/)
 
 ## GUIDE
+
+### Automated pipeline
+
+From the repository root, run `poetry install` and make sure `foldx`, `vmd`, `namd3`, and `poetry` are on your `PATH`. Use a CUDA-enabled NAMD build for `-g`.
+Then `cd pipeline` and run `bash ./scripts/pipeline.sh --help` for options or `bash ./scripts/pipeline.sh -k 5 -p 4` to scan and process up to five entries.
+For `-m`, create `pipeline/sorted_positions.txt` with one entry per line **and a final newline**. Use FoldX mutation codes such as `KA23R`, or join codes with `_` for a combined mutant, as in `KA23R_SA89M`.
+Stage outputs are written under `pipeline/output/`.
 
 We present here a step by step guide on what we did.
 

@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Checking if the file is already present
+if [[ -f "1COF_Repair.pdb" ]]; then
+    echo "Repaired file exists"
+    exit 0
+fi
+
 # Output for keeping additional foldx outputs
 output_dir="output/repair_pdb"
 mkdir -p "$output_dir" || exit 1

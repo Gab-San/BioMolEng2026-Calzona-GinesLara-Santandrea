@@ -14,7 +14,7 @@ while read -r mutation rest; do
 
     output_dir="output/build_model/$mutation"
     mkdir -p "$output_dir" || exit 1
-    printf '%s;\n' "$mutation" > "$output_dir/individual_list.txt"
+    printf '%s;\n' "${mutation//_/,}" > "$output_dir/individual_list.txt"
 
     (
         cd "$output_dir" || exit 1
