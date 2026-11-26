@@ -44,7 +44,7 @@ proc run_atomq {arguments} {
 
     # Original atomq.tcl needs helper procedures from this extension.
     # Search the working directory first, then next to this Tcl script.
-    set ext "../common/VMDextensions.tcl"
+    set ext "../../../../common/VMDextensions.tcl"
     if {![file readable $ext]} {
         # This fallback works when Tcl exposes the current script path.
         set current_script [info script]
