@@ -9,21 +9,22 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
+SCRIPT_DIR = Path(__file__).resolve().parent
+RESIDUE_SUBDIR = Path("analysis/qvalue_per_residue")
+
+
 def parse_arguments():
-    script_dir = Path(__file__).resolve().parent
-    default_postprocessed_dir = (
-        script_dir.parent / "pipeline" / "output" / "postprocessed"
-    )
+    default_postprocessed_dir = SCRIPT_DIR.parent / "pipeline/output/postprocessed"
 
     parser = argparse.ArgumentParser(
-        description=(
-            "Plot the per-residue mean and variance of Q over the final "
-            "time window for one mutation."
-        )
+        usage="%(prog)s [options] [MUTATION ...] [WINDOW] [{ps,ns}]",
+        description="Plot per-residue Q boxplots or compare mean Q across mutations.",
     )
-    parser.add_argument("mutation", help="Mutation directory name, e.g. WT or A45G")
-    parser.add_argument("window", type=float, help="Length of the final time window")
-    parser.add_argument("time_unit", choices=("ps", "ns"), help="Unit of the time window")
+    parser.add_argument(
+        "selection", nargs="*", metavar="MUTATION",
+        help="Mutation names or 'all' (default), followed by a window (default: 2500) "
+             "and its unit (default: ps). Example: WT A45G 2.5 ns.",
+    )
     parser.add_argument(
         "--postprocessed-dir",
         type=Path,
@@ -37,17 +38,44 @@ def parse_arguments():
         "--output-dir",
         type=Path,
         default=None,
-        help="Output directory (default: <mutation>/plots)",
+        help="Output directory (default: <mutation>/plots or eda/output for comparisons)",
     )
 
-    args = parser.parse_args()
+    args = parser.parse_intermixed_args()
+    mutations = args.selection
+    args.time_unit = mutations.pop() if mutations and mutations[-1] in {"ps", "ns"} else "ps"
+    args.window = 2500.0
+    if mutations:
+        try:
+            window = float(mutations[-1])
+        except ValueError:
+            pass
+        else:
+            args.window = window
+            mutations.pop()
 
     if not math.isfinite(args.window) or args.window <= 0:
         parser.error("window must be a finite number greater than zero")
-    if Path(args.mutation).name != args.mutation or args.mutation in {".", ".."}:
-        parser.error("mutation must be a directory name, not a path")
+    if any(Path(name).name != name or name in {"", ".", ".."} for name in mutations):
+        parser.error("mutations must be directory names, not paths")
+    if "all" in mutations and mutations != ["all"]:
+        parser.error("use 'all' by itself or specify individual mutations")
 
+    args.mutations = list(dict.fromkeys(mutations)) or ["all"]
     return args
+
+
+def get_mutations(args):
+    if args.mutations != ["all"]:
+        return args.mutations
+
+    mutations = [
+        path.name for path in args.postprocessed_dir.iterdir()
+        if (path / RESIDUE_SUBDIR).is_dir()
+    ]
+    if not mutations:
+        raise FileNotFoundError(f"No per-residue Q output found in {args.postprocessed_dir}")
+    return sorted(mutations, key=lambda name: (name != "WT", name.count("_"), name))
 
 
 def get_residue_number(path):
@@ -95,12 +123,9 @@ def read_residue_file(path):
     return times, q_values, time_match.group(1).lower()
 
 
-def main():
-    args = parse_arguments()
-
+def load_residue_samples(args, mutation, *, required=True):
     unit_to_ps = {"ps": 1.0, "ns": 1000.0}
-    mutation_dir = args.postprocessed_dir / args.mutation
-    residue_dir = mutation_dir / "analysis" / "qvalue_per_residue"
+    residue_dir = args.postprocessed_dir / mutation / RESIDUE_SUBDIR
 
     if not residue_dir.is_dir():
         raise FileNotFoundError(f"Per-residue Q directory not found: {residue_dir}")
@@ -110,8 +135,7 @@ def main():
         raise FileNotFoundError(f"No residue_*.dat files found in {residue_dir}")
 
     residues = []
-    mean_values = []
-    variance_values = []
+    samples = []
     reference_times = None
     data_unit = None
 
@@ -143,65 +167,119 @@ def main():
             raise ValueError(f"Q values outside [0, 1] in {residue_file}")
 
         if values.size:
-            mean_q = float(np.mean(values))
-            variance_q = float(np.var(values, ddof=0))
             residues.append(residue)
-            mean_values.append(mean_q)
-            variance_values.append(variance_q)
-        else:
-            mean_q = np.nan
-            variance_q = np.nan
+            samples.append(values)
 
-    if not residues:
+    if required and not residues:
         raise ValueError(
             f"No valid Q values found in the final {args.window:g} {args.time_unit} "
-            f"for mutation {args.mutation}"
+            f"for mutation {mutation}"
         )
 
-    output_dir = args.output_dir or mutation_dir / "plots"
-    output_dir.mkdir(parents=True, exist_ok=True)
+    return residues, samples, data_unit
 
-    window_label = f"{args.window:g}{args.time_unit}"
-    plot_path = output_dir / f"qvalue_per_residue_mean_variance_last_{window_label}.png"
 
-    fig_width = max(10, 0.32 * len(residues))
-    fig, mean_ax = plt.subplots(
+def plot_boxplots(mutation, residues, samples, window_title):
+    fig_width = max(8, 0.53 * len(residues))
+    fig, ax = plt.subplots(
         figsize=(fig_width, 5.5),
         layout="constrained",
     )
 
-    mean_ax.errorbar(
-        residues,
-        mean_values,
-        yerr=np.sqrt(variance_values),
-        fmt="o",
-        markersize=3.5,
-        capsize=2,
-        linewidth=1,
-        label="Mean Q ± standard deviation",
+    ax.boxplot(
+        samples, tick_labels=residues, showmeans=True, meanline=True,
+        meanprops={"linestyle": "-", "color": "black"}, medianprops={"visible": False},
     )
-    mean_ax.set(
+    ax.set(
         xlabel="Residue number",
         ylabel="Per-residue Q",
-        title=(
-            f"{args.mutation}: per-residue Q over the final "
-            f"{args.window:g} {args.time_unit}"
-        ),
+        title=f"{mutation}: per-residue Q over the final {window_title}",
         ylim=(0, 1),
     )
-    mean_ax.set_xticks(residues)
-    mean_ax.tick_params(axis="x", labelrotation=90)
-    mean_ax.grid(axis="y", alpha=0.25)
-    mean_ax.legend()
+    ax.tick_params(axis="x", labelrotation=90)
+    return fig
 
-    fig.savefig(plot_path, dpi=180)
-    plt.close(fig)
 
-    print(f"Mutation: {args.mutation}")
-    print(
-        f"Window: final {args.window:g} {args.time_unit} "
-        f"(trajectory time unit: {data_unit})"
+def plot_comparison(means_by_mutation, window_title):
+    residues = sorted({residue for means in means_by_mutation.values() for residue in means})
+    positions = {residue: index for index, residue in enumerate(residues)}
+    series = [(name, means) for name, means in means_by_mutation.items() if name != "WT"]
+    markers = ("o", "s", "^", "D", "v", "P", "X", "h")
+    colors = plt.get_cmap("tab10").colors
+    per_panel = len(markers)
+    panel_count = math.ceil(len(series) / per_panel)
+    fig, axes = plt.subplots(
+        panel_count, 1, sharex=True, sharey=True, squeeze=False,
+        figsize=(max(8, 0.53 * len(residues)), max(4.5, 3.0 * panel_count)),
+        layout="constrained",
     )
+    bottom_ax = axes[-1, 0]
+    bottom_ax.set_xticks(range(len(residues)), labels=residues)
+    bottom_ax.set(xlim=(-0.5, len(residues) - 0.5), ylim=(-0.025, 1.025))
+
+    for panel_index, ax in enumerate(axes[:, 0]):
+        start = panel_index * per_panel
+        group = [("WT", means_by_mutation.get("WT", {})), *series[start:start + per_panel]]
+        # Give each mutation its own position within each residue's tick interval.
+        spacing = 0.8 / len(group)
+        for index, (mutation, means) in enumerate(group):
+            offset = (index - (len(group) - 1) / 2) * spacing
+            ax.plot(
+                [positions[residue] + offset for residue in means], list(means.values()),
+                linestyle="none", marker="*" if mutation == "WT" else markers[(index + panel_index) % per_panel],
+                color="black" if mutation == "WT" else colors[index - 1], markersize=6 if mutation == "WT" else 3.6,
+                markeredgewidth=0.35, label=mutation,
+            )
+        ax.grid(axis="x", alpha=0.18)
+        ax.set_axisbelow(True)
+        ax.tick_params(axis="x", labelbottom=True, labelrotation=90)
+        for residue, tick in zip(residues, ax.get_xticklabels(), strict=True):
+            if residue not in group[0][1]:
+                ax.annotate("×", (0.5, 0), xycoords=tick, color="red", ha="center", va="top", annotation_clip=False)
+        ax.legend(loc="lower left", bbox_to_anchor=(0, 1), ncols=min(4, len(group)),
+                  frameon=False, borderaxespad=0)
+
+    fig.supxlabel("Residue number")
+    fig.supylabel("Mean per-residue Q")
+    fig.suptitle(f"Mean per-residue Q over the final {window_title}")
+    return fig, residues
+
+
+def main():
+    args = parse_arguments()
+    mutations = get_mutations(args)
+    window_title = f"{args.window:g} {args.time_unit}"
+    window_label = f"{args.window:g}{args.time_unit}"
+
+    if len(mutations) == 1:
+        mutation = mutations[0]
+        residues, samples, data_unit = load_residue_samples(args, mutation)
+        fig = plot_boxplots(mutation, residues, samples, window_title)
+        output_dir = args.output_dir or args.postprocessed_dir / mutation / "plots"
+        filename = f"qvalue_per_residue_mean_variance_last_{window_label}.png"
+        print(f"Mutation: {mutation}")
+        print(f"Window: final {window_title} (trajectory time unit: {data_unit})")
+    else:
+        means_by_mutation = {}
+        wt = ["WT"] if any((args.postprocessed_dir / "WT" / RESIDUE_SUBDIR).glob("residue_*.dat")) else []
+        for mutation in [*(name for name in mutations if name != "WT"), *wt]:
+            residues, samples, _ = load_residue_samples(args, mutation, required=mutation != "WT")
+            means_by_mutation[mutation] = {
+                residue: values.mean() for residue, values in zip(residues, samples, strict=True)
+            }
+        fig, residues = plot_comparison(means_by_mutation, window_title)
+        output_dir = args.output_dir or SCRIPT_DIR / "output"
+        filename = f"qvalue_per_residue_mean_comparison_last_{window_label}.png"
+        print(f"Mutations compared: {len(mutations)}")
+        print(f"Window: final {window_title}")
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    plot_path = output_dir / filename
+    try:
+        fig.savefig(plot_path, dpi=180)
+    finally:
+        plt.close(fig)
+
     print(f"Residues plotted: {len(residues)}")
     print(f"Saved plot: {plot_path}")
 
