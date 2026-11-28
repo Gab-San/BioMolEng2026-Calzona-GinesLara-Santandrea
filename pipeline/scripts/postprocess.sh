@@ -24,7 +24,7 @@ while read -r mutation rest; do
          -args ../../preprocessed/${mutation}/cof_ionized.psf ../../simulated/${mutation}/cof_eq.pdb.dcd < /dev/null|| exit 1
 
         # Postprocessing Q-value calculation
-        vmd -dispdev text -e ${pipeline_dir}/../common/atomq_updated.tcl \
+        vmd -dispdev text -e ${pipeline_dir}/../common/atomq.tcl \
          -args ../../preprocessed/${mutation}/cof_ionized.psf ../../simulated/${mutation}/cof_eq.pdb.dcd < /dev/null|| exit 1
 
         # Per-residue Q-value calculation
